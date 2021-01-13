@@ -54,10 +54,17 @@ public:
     {
         cout << "Login successful!" << endl;
     }
-    void changePassword(string newPassword)
+    void changePassword(string newPassword, map<string, pair<string, bool>> &listOfAccounts)
     {
-        this->password = newPassword;
-        cout << "Change password successful!" << endl;
+        map<string, pair<string, bool>>::iterator account;
+        for (account = listOfAccounts.begin(); account != listOfAccounts.end(); ++account)
+        {
+            if (account->first == this->username)
+            {
+                this->password = account->second.first = newPassword;
+                cout << "Change password successful!" << endl;
+            }
+        }
     }
 };
 
@@ -110,6 +117,7 @@ public:
     void setListOfAccounts(map<string, pair<string, bool>> listOfAccounts)
     {
         this->totalAccounts = listOfAccounts.size();
+        this->managedAccounts = {};
         map<string, pair<string, bool>>::iterator account;
         for (account = listOfAccounts.begin(); account != listOfAccounts.end(); ++account)
         {
@@ -146,27 +154,15 @@ public:
     void deleteAnAccount(User deleteAccount)
     {
         this->totalAccounts--;
-        for (auto accountInList = this->managedAccounts.begin(); accountInList != this->managedAccounts.end();)
+        int indexOfAccount = 0;
+        for (auto accountInList = this->managedAccounts.begin(); accountInList != this->managedAccounts.end(); ++accountInList)
         {
-            if (accountInList->getAccountInfo() == deleteAccount.getAccountInfo())
+            if (accountInList->getAccountInfo().first == deleteAccount.getAccountInfo().first)
             {
-                accountInList = this->managedAccounts.erase(accountInList);
+                this->managedAccounts.erase(this->managedAccounts.begin() + indexOfAccount);
                 break;
             }
-        }
-    }
-    void deleteListOfAccounts(vector<User> listOfDeleteAccounts)
-    {
-        this->totalAccounts -= listOfDeleteAccounts.size();
-        for (auto accountInTextFile = this->managedAccounts.begin(); accountInTextFile != this->managedAccounts.end();)
-        {
-            for (auto accountInDeleteList = listOfDeleteAccounts.begin(); accountInDeleteList != listOfDeleteAccounts.end();)
-            {
-                if (accountInTextFile == accountInDeleteList)
-                {
-                    accountInTextFile = this->managedAccounts.erase(accountInTextFile);
-                }
-            }
+            indexOfAccount++;
         }
     }
     vector<User> getListOfInactiveAccounts()
@@ -327,61 +323,63 @@ int main()
     {
     case '1':
         if (isValidAccount(account.getAccountInfo(), textFile))
-        {
             account.login();
-        }
         else
-        {
             cout << "Login fail..." << endl;
-        }
         break;
     case '2':
         cout << "Enter new password: " << endl;
         cin >> newPassword;
         if (isValidAccount(account.getAccountInfo(), textFile) && isPasswordInCorrectForm(newPassword))
         {
-            account.changePassword(newPassword);
+            account.changePassword(newPassword, textFile);
+            accountManager.setListOfAccounts(textFile);
+            cout << "List of accounts after changing..." << endl;
             accountManager.printListOfAccounts();
             updateListOfAccountsToTextFile(ACCOUNT_FILE, accountManager.getListOfAccounts());
         }
         else
-        {
             cout << "Please enter valid account or new password in correct format!" << endl;
-        }
         break;
     case '3':
         if (!hasAccountExisted(accountInfo.first, accountManager.getListOfAccounts()) && isPasswordInCorrectForm(accountInfo.second.first))
         {
             accountManager.createNewAccount(account);
             updateListOfAccountsToTextFile(ACCOUNT_FILE, accountManager.getListOfAccounts());
+            cout << "List of accounts after changing..." << endl;
+            accountManager.printListOfAccounts();
         }
         else
-        {
             cout << "Please enter another username or password" << endl;
-        }
-        cout << "List of accounts after changing..." << endl;
-        accountManager.printListOfAccounts();
         break;
     case '4':
-        accountManager.deleteAnAccount(account);
-        updateListOfAccountsToTextFile(ACCOUNT_FILE, accountManager.getListOfAccounts());
-        cout << "List of accounts after changing..." << endl;
-        accountManager.printListOfAccounts();
-        break;
-    case '5':
-        account.deleteAccount();
-        bool isApprove;
-        cout << "As an Admin," << endl
-             << "Please enter 0 if approve the request." << endl
-             << "Please press any key if disapprove the request." << endl;
-        cin >> isApprove;
-        if (!isApprove)
+        if (isValidAccount(account.getAccountInfo(), textFile))
         {
             accountManager.deleteAnAccount(account);
+            updateListOfAccountsToTextFile(ACCOUNT_FILE, accountManager.getListOfAccounts());
+            cout << "List of accounts after changing..." << endl;
+            accountManager.printListOfAccounts();
         }
-        updateListOfAccountsToTextFile(ACCOUNT_FILE, accountManager.getListOfAccounts());
-        cout << "List of accounts after changing..." << endl;
-        accountManager.printListOfAccounts();
+        break;
+    case '5':
+        if (isValidAccount(account.getAccountInfo(), textFile))
+        {
+            account.deleteAccount();
+            bool isApprove;
+            cout << "As an Admin," << endl
+                 << "Please enter 0 if approve the request." << endl
+                 << "Please press any key if disapprove the request." << endl;
+            cin >> isApprove;
+            if (!isApprove)
+            {
+                accountManager.deleteAnAccount(account);
+                updateListOfAccountsToTextFile(ACCOUNT_FILE, accountManager.getListOfAccounts());
+                cout << "List of accounts after changing..." << endl;
+                accountManager.printListOfAccounts();
+            }
+        }
+        else
+            cout << "Please enter valid account" << endl;
         break;
     }
 }
