@@ -2,6 +2,7 @@
 #define ADMIN_CPP
 #include "Admin.h"
 #include <iostream>
+#include "User.h"
 
 Admin::Admin()
 {
@@ -10,6 +11,11 @@ Admin::Admin()
     this->totalAccounts = 0;
     this->managedAccounts = {};
 }
+Admin::Admin(const Admin &account)
+{
+    this->managedAccounts = account.managedAccounts;
+    this->totalAccounts = account.managedAccounts.size();
+}
 Admin::~Admin()
 {
     this->username = this->password = "";
@@ -17,7 +23,20 @@ Admin::~Admin()
     this->totalAccounts = 0;
     this->managedAccounts = {};
 }
-void Admin::updateAccountInfo(Account updateAccount)
+User Admin::getAccountInfoByUsername(string username)
+{
+    User accountInfo;
+    for (auto account = this->managedAccounts.begin(); account != this->managedAccounts.end(); ++account)
+    {
+        if (account->getAccountInfo().first == username)
+        {
+            accountInfo = User{username, account->getAccountInfo().second.first, account->getAccountInfo().second.second};
+            break;
+        }
+    }
+    return accountInfo;
+}
+void Admin::updateAccountInfo(User updateAccount)
 {
     vector<User>::iterator account;
     for (account = this->managedAccounts.begin(); account < this->managedAccounts.end(); ++account)
@@ -64,15 +83,14 @@ void Admin::createNewAccount(User newAccount)
     cout << "Username: " << newAccount.getAccountInfo().first << "\t"
          << "Password: " << newAccount.getAccountInfo().second.first << endl;
     this->managedAccounts.push_back(User(newAccount));
-    cout << "Create new account successful!" << endl;
 }
-void Admin::deleteAnAccount(User deleteAccount)
+void Admin::deleteAnAccount(string usernameOfAccount)
 {
     this->totalAccounts--;
     int indexOfAccount = 0;
     for (auto accountInList = this->managedAccounts.begin(); accountInList != this->managedAccounts.end(); ++accountInList)
     {
-        if (accountInList->getAccountInfo().first == deleteAccount.getAccountInfo().first)
+        if (accountInList->getAccountInfo().first == usernameOfAccount)
         {
             this->managedAccounts.erase(this->managedAccounts.begin() + indexOfAccount);
             break;
@@ -80,7 +98,20 @@ void Admin::deleteAnAccount(User deleteAccount)
         indexOfAccount++;
     }
 }
-void Admin::deleteAnAccount(vector<User> listOfAccounts)
+void Admin::deleteAnAccountInInactiveList(string usernameOfAccount)
+{
+    int indexOfAccount = 0;
+    for (auto accountInList = this->inactiveAccounts.begin(); accountInList != this->inactiveAccounts.end(); ++accountInList)
+    {
+        if (accountInList->getAccountInfo().first == usernameOfAccount)
+        {
+            this->inactiveAccounts.erase(this->managedAccounts.begin() + indexOfAccount);
+            break;
+        }
+        indexOfAccount++;
+    }
+}
+void Admin::deleteListOfAccounts(vector<User> listOfAccounts)
 {
     this->totalAccounts -= listOfAccounts.size();
     int indexOfAccount = 0;
@@ -90,24 +121,32 @@ void Admin::deleteAnAccount(vector<User> listOfAccounts)
         indexOfAccount++;
     }
 }
-vector<User> Admin::getListOfInactiveAccounts()
+void Admin::syncListOfInactiveAccounts()
 {
-    vector<User> listOfInactiveAccounts;
     vector<User>::iterator account;
+    this->inactiveAccounts.clear();
     for (account = this->managedAccounts.begin(); account != this->managedAccounts.end(); ++account)
     {
         if (!account->getAccountInfo().second.second)
         {
-            listOfInactiveAccounts.push_back(User(account->getAccountInfo().first, account->getAccountInfo().second.first, account->getAccountInfo().second.second));
+            this->inactiveAccounts.push_back(User(account->getAccountInfo().first, account->getAccountInfo().second.first, account->getAccountInfo().second.second));
         }
     }
-    return listOfInactiveAccounts;
 }
-void Admin::printListOfInactiveAccounts(vector<User> listOfInactiveAccounts)
+vector<User> Admin::getListOfInactiveAccounts()
+{
+    vector<User> returnedList;
+    for (auto account = this->inactiveAccounts.begin(); account != this->inactiveAccounts.end(); ++account)
+    {
+        returnedList.push_back(User{account->getAccountInfo()});
+    }
+    return returnedList;
+}
+void Admin::printListOfInactiveAccounts()
 {
     vector<User>::iterator account;
     cout << "Inactive accounts: " << endl;
-    for (account = listOfInactiveAccounts.begin(); account < listOfInactiveAccounts.end(); ++account)
+    for (account = this->inactiveAccounts.begin(); account < this->inactiveAccounts.end(); ++account)
     {
         account->printAccountInfo();
     }
@@ -126,4 +165,5 @@ bool Admin::isValidAccount(pair<string, pair<string, bool>> checkAccount)
     }
     return isValid;
 }
+
 #endif

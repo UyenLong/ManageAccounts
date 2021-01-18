@@ -8,6 +8,7 @@ public:
     User();
     User(string, string, bool);
     User(const User &);
+    User(pair<string, pair<string, bool>>);
     ~User();
     void deleteAccount();
 };

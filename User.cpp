@@ -19,6 +19,12 @@ User::User(const User &copyUser)
     this->password = copyUser.password;
     this->isActive = copyUser.isActive;
 }
+User::User(pair<string, pair<string, bool>> userInfo)
+{
+    this->username = userInfo.first;
+    this->password = userInfo.second.first;
+    this->isActive = userInfo.second.second;
+}
 User::~User()
 {
     this->username = this->password = "";
