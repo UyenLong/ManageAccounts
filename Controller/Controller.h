@@ -1,10 +1,10 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "FileHandler.h"
-#include "Admin.h"
+#include "../FileHandler/FileHandler.h"
+#include "../AccountType/Admin.h"
 #include <string>
-#define ACCOUNT_FILE "accountInfo.txt"
+#define ACCOUNT_FILE "ManagerAccount/DataInTextFile/accountInfo.txt"
 #define PASSWORD_RULES "(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&]).{8,}"
 #define CHANGE_PASSWORD '1'
 #define CREATE_ACCOUNT '2'

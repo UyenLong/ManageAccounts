@@ -1,7 +1,7 @@
 #ifndef FILEHANDLER_CPP
 #define FILEHANDLER_CPP
-#include "FileHandler.h"
-#include "Controller.h"
+#include "../FileHandler/FileHandler.h"
+#include "../Controller/Controller.h"
 #include <iostream>
 #include <fstream>
 

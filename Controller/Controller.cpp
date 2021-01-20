@@ -3,7 +3,7 @@
 
 #include <regex>
 #include <string>
-#include "Controller.h"
+#include "../Controller/Controller.h"
 #include <iostream>
 
 using namespace std;
@@ -134,7 +134,7 @@ void Controller::deleteAccountByAdmin()
 {
     this->admin.deleteAnAccount(this->user.getAccountInfo().first);
     this->fileHandler.updateListOfAccountsToTextFile(this->admin.getListOfAccounts());
-    cout << "Delete account successful!" << endl;
+    cout << "Delete account successfully!" << endl;
 }
 void Controller::deleteAccountByUser()
 {
